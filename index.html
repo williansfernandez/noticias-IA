@@ -3,71 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Noticias con Moderación IA</title>
+  <title>Diario Renovable - Noticias con Moderación IA</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <header class="site-header">
+    <div class="logo">Diario <span>Renovable</span></div>
+    <nav class="main-nav">
+      <a href="#">Inicio</a>
+      <a href="#">Nacional</a>
+      <a href="#">Internacional</a>
+      <a href="#">Tecnología</a>
+      <a href="#">Medio Ambiente</a>
+    </nav>
+  </header>
 
   <main class="container">
-    <header>
-      <h1>Avances en Energías Renovables</h1>
-    </header>
-
     <article class="noticia">
+      <h1>Avances en Energías Renovables Transforman el Futuro Energético</h1>
+      <p class="meta">Publicado el 23 de mayo de 2025 | Por Redacción Diario Renovable</p>
+      <img src="https://source.unsplash.com/featured/?solar,wind" alt="Energías renovables" class="img-principal">
       <p>
-        Las energías renovables continúan creciendo en todo el mundo, reduciendo la dependencia de combustibles fósiles y ayudando a combatir el cambio climático.
+        Las energías renovables continúan creciendo en todo el mundo, reduciendo la dependencia de combustibles fósiles y ayudando a combatir el cambio climático. Desde paneles solares hasta turbinas eólicas, la innovación está acelerando la transición energética global.
+      </p>
+      <p>
+        Expertos aseguran que en la próxima década, la mayoría de países podría cubrir más del 50% de su demanda eléctrica con fuentes limpias. Gobiernos, empresas y ciudadanos están apostando por soluciones sostenibles.
       </p>
     </article>
 
     <section class="comentarios">
       <h2>Comentarios</h2>
-
       <form id="formComentario" novalidate>
         <textarea id="inputComentario" rows="4" placeholder="Escribe tu comentario aquí..."></textarea>
         <p id="mensajeError" class="error-message"></p>
         <button type="submit">Enviar Comentario</button>
       </form>
-
       <div id="listaComentarios" class="lista-comentarios"></div>
     </section>
   </main>
 
-  <script>
-    const palabrasOfensivas = ["idiota", "tonto", "feo", "estúpido", "burro"];
+  <footer class="site-footer">
+    <p>&copy; 2025 Diario Renovable. Todos los derechos reservados.</p>
+  </footer>
 
-    function tienePalabrasOfensivas(texto) {
-      const textoMinuscula = texto.toLowerCase();
-      return palabrasOfensivas.some(palabra => textoMinuscula.includes(palabra));
-    }
-
-    document.getElementById("formComentario").addEventListener("submit", function(e) {
-      e.preventDefault();
-
-      const input = document.getElementById("inputComentario");
-      const mensajeError = document.getElementById("mensajeError");
-      const listaComentarios = document.getElementById("listaComentarios");
-
-      const comentario = input.value.trim();
-
-      if (comentario === "") {
-        mensajeError.textContent = "El comentario no puede estar vacío.";
-        return;
-      }
-
-      if (tienePalabrasOfensivas(comentario)) {
-        mensajeError.textContent = "Tu comentario contiene palabras inapropiadas y no puede ser publicado.";
-        return;
-      }
-
-      const divComentario = document.createElement("div");
-      divComentario.classList.add("comentario");
-      divComentario.textContent = comentario;
-      listaComentarios.appendChild(divComentario);
-
-      input.value = "";
-      mensajeError.textContent = "";
-    });
-  </script>
-
+  <script src="moderacionIA.js"></script>
 </body>
 </html>
