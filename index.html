@@ -46,6 +46,39 @@
     <p>&copy; 2025 Diario Renovable. Todos los derechos reservados.</p>
   </footer>
 
-  <script src="moderacionIA.js"></script>
+  <script>
+    const comentariosIA = ["idiota", "tonto", "feo", "estúpido", "burro"];
+
+    function moderarComentario(texto) {
+      const textoLimpio = texto.toLowerCase();
+      return comentariosIA.some(palabra => textoLimpio.includes(palabra));
+    }
+
+    document.getElementById("formComentario").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const input = document.getElementById("inputComentario");
+      const mensajeError = document.getElementById("mensajeError");
+      const listaComentarios = document.getElementById("listaComentarios");
+
+      const comentario = input.value.trim();
+
+      if (comentario === "") {
+        mensajeError.textContent = "El comentario no puede estar vacío.";
+        return;
+      }
+
+      const esInapropiado = moderarComentario(comentario);
+
+      const divComentario = document.createElement("div");
+      divComentario.classList.add("comentario");
+      divComentario.textContent = comentario;
+      divComentario.style.color = esInapropiado ? "red" : "black";
+
+      listaComentarios.appendChild(divComentario);
+
+      input.value = "";
+      mensajeError.textContent = "";
+    });
+  </script>
 </body>
 </html>
