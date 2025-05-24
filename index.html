@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Noticias con Moderación IA</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <main class="container">
+    <header>
+      <h1>Avances en Energías Renovables</h1>
+    </header>
+
+    <article class="noticia">
+      <p>
+        Las energías renovables continúan creciendo en todo el mundo, reduciendo la dependencia de combustibles fósiles y ayudando a combatir el cambio climático.
+      </p>
+    </article>
+
+    <section class="comentarios">
+      <h2>Comentarios</h2>
+
+      <form id="formComentario" novalidate>
+        <textarea id="inputComentario" rows="4" placeholder="Escribe tu comentario aquí..."></textarea>
+        <p id="mensajeError" class="error-message"></p>
+        <button type="submit">Enviar Comentario</button>
+      </form>
+
+      <div id="listaComentarios" class="lista-comentarios"></div>
+    </section>
+  </main>
+
+  <script>
+    const palabrasOfensivas = ["idiota", "tonto", "feo", "estúpido", "burro"];
+
+    function tienePalabrasOfensivas(texto) {
+      const textoMinuscula = texto.toLowerCase();
+      return palabrasOfensivas.some(palabra => textoMinuscula.includes(palabra));
+    }
+
+    document.getElementById("formComentario").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const input = document.getElementById("inputComentario");
+      const mensajeError = document.getElementById("mensajeError");
+      const listaComentarios = document.getElementById("listaComentarios");
+
+      const comentario = input.value.trim();
+
+      if (comentario === "") {
+        mensajeError.textContent = "El comentario no puede estar vacío.";
+        return;
+      }
+
+      if (tienePalabrasOfensivas(comentario)) {
+        mensajeError.textContent = "Tu comentario contiene palabras inapropiadas y no puede ser publicado.";
+        return;
+      }
+
+      const divComentario = document.createElement("div");
+      divComentario.classList.add("comentario");
+      divComentario.textContent = comentario;
+      listaComentarios.appendChild(divComentario);
+
+      input.value = "";
+      mensajeError.textContent = "";
+    });
+  </script>
+
+</body>
+</html>
