@@ -47,14 +47,16 @@
   </footer>
 
   <script>
-    const comentariosIA = ["idiota", "tonto", "feo", "estúpido", "burro"];
-
-    function moderarComentario(texto) {
-      const textoLimpio = texto.toLowerCase();
-      return comentariosIA.some(palabra => textoLimpio.includes(palabra));
+    async function analizarComentarioIA(texto) {
+      // Simulación de IA con promesa asíncrona (puede conectarse con API real)
+      return new Promise(resolve => {
+        const palabrasOfensivas = ["idiota", "tonto", "feo", "estúpido", "burro", "imbécil", "basura"];
+        const contiene = palabrasOfensivas.some(p => texto.toLowerCase().includes(p));
+        setTimeout(() => resolve(!contiene), 300); // Simula respuesta de IA
+      });
     }
 
-    document.getElementById("formComentario").addEventListener("submit", function (e) {
+    document.getElementById("formComentario").addEventListener("submit", async function (e) {
       e.preventDefault();
       const input = document.getElementById("inputComentario");
       const mensajeError = document.getElementById("mensajeError");
@@ -67,12 +69,12 @@
         return;
       }
 
-      const esInapropiado = moderarComentario(comentario);
+      const esAprobado = await analizarComentarioIA(comentario);
 
       const divComentario = document.createElement("div");
       divComentario.classList.add("comentario");
       divComentario.textContent = comentario;
-      divComentario.style.color = esInapropiado ? "red" : "black";
+      divComentario.style.color = esAprobado ? "black" : "red";
 
       listaComentarios.appendChild(divComentario);
 
