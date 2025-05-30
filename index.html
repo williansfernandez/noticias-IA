@@ -3,83 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Diario Renovable - Noticias con Moderación IA</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>Moderador Comentarios IA</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="logo">Diario <span>Renovable</span></div>
-    <nav class="main-nav">
-      <a href="#">Inicio</a>
-      <a href="#">Nacional</a>
-      <a href="#">Internacional</a>
-      <a href="#">Tecnología</a>
-      <a href="#">Medio Ambiente</a>
-    </nav>
-  </header>
-
-  <main class="container">
-    <article class="noticia">
-      <h1>Avances en Energías Renovables Transforman el Futuro Energético</h1>
-      <p class="meta">Publicado el 23 de mayo de 2025 | Por Redacción Diario Renovable</p>
-      <img src="https://source.unsplash.com/featured/?solar,wind" alt="Energías renovables" class="img-principal">
-      <p>
-        Las energías renovables continúan creciendo en todo el mundo, reduciendo la dependencia de combustibles fósiles y ayudando a combatir el cambio climático. Desde paneles solares hasta turbinas eólicas, la innovación está acelerando la transición energética global.
-      </p>
-      <p>
-        Expertos aseguran que en la próxima década, la mayoría de países podría cubrir más del 50% de su demanda eléctrica con fuentes limpias. Gobiernos, empresas y ciudadanos están apostando por soluciones sostenibles.
-      </p>
-    </article>
-
-    <section class="comentarios">
-      <h2>Comentarios</h2>
-      <form id="formComentario" novalidate>
-        <textarea id="inputComentario" rows="4" placeholder="Escribe tu comentario aquí..."></textarea>
-        <p id="mensajeError" class="error-message"></p>
-        <button type="submit">Enviar Comentario</button>
-      </form>
-      <div id="listaComentarios" class="lista-comentarios"></div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>&copy; 2025 Diario Renovable. Todos los derechos reservados.</p>
-  </footer>
+  <div class="container">
+    <h1>Noticias y Comentarios</h1>
+    <form id="formComentario">
+      <textarea id="inputComentario" rows="4" placeholder="Escribe tu comentario..."></textarea>
+      <p id="mensajeError" class="error"></p>
+      <button type="submit">Enviar</button>
+    </form>
+    <div id="listaComentarios"></div>
+  </div>
 
   <script>
-    async function analizarComentarioIA(texto) {
-      // Simulación de IA con promesa asíncrona (puede conectarse con API real)
-      return new Promise(resolve => {
-        const palabrasOfensivas = ["idiota", "tonto", "feo", "estúpido", "burro", "imbécil", "basura"];
-        const contiene = palabrasOfensivas.some(p => texto.toLowerCase().includes(p));
-        setTimeout(() => resolve(!contiene), 300); // Simula respuesta de IA
-      });
+    const form = document.getElementById("formComentario");
+    const input = document.getElementById("inputComentario");
+    const mensajeError = document.getElementById("mensajeError");
+    const lista = document.getElementById("listaComentarios");
+
+    const palabrasBloqueadas = ["bruto", "feo", "webon"];
+    const palabraContexto = "negro";
+    const contextoNeutral = ["televisor", "ventilador", "auto", "camisa", "color", "pantalón", "zapato", "carro", "celular"];
+
+    function filtroManual(texto) {
+      const textoLower = texto.toLowerCase();
+      for (const palabra of palabrasBloqueadas) {
+        if (textoLower.includes(palabra)) {
+          return true;
+        }
+      }
+      if (textoLower.includes(palabraContexto)) {
+        const tieneContextoNeutral = contextoNeutral.some(ctx => textoLower.includes(ctx));
+        if (!tieneContextoNeutral) return true;
+      }
+      return false;
     }
 
-    document.getElementById("formComentario").addEventListener("submit", async function (e) {
+    const TOKEN = "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";
+    const MODEL_URL = "https://api-inference.huggingface.co/models/unitary/toxic-bert";
+    const UMBRAL_TOXICO = 0.35;
+
+    async function analizarOracion(oracion) {
+      const res = await fetch(MODEL_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ inputs: oracion })
+      });
+
+      const resultado = await res.json();
+      if (resultado.error) {
+        console.error("Error del modelo:", resultado.error);
+        return false;
+      }
+
+      const etiquetasToxicas = [
+        "toxic", "severe_toxicity", "obscene", "threat", "insult", "identity_hate", "sexual_explicit"
+      ];
+
+      return resultado[0].some(etiqueta =>
+        etiquetasToxicas.includes(etiqueta.label.toLowerCase()) && etiqueta.score > UMBRAL_TOXICO
+      );
+    }
+
+    async function esToxico(texto) {
+      if (filtroManual(texto)) return true;
+      const oraciones = texto.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0);
+      for (const oracion of oraciones) {
+        const toxico = await analizarOracion(oracion);
+        if (toxico) return true;
+      }
+      return false;
+    }
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const input = document.getElementById("inputComentario");
-      const mensajeError = document.getElementById("mensajeError");
-      const listaComentarios = document.getElementById("listaComentarios");
+      mensajeError.textContent = "";
+      const texto = input.value.trim();
 
-      const comentario = input.value.trim();
-
-      if (comentario === "") {
+      if (texto === "") {
         mensajeError.textContent = "El comentario no puede estar vacío.";
         return;
       }
 
-      const esAprobado = await analizarComentarioIA(comentario);
+      const toxic = await esToxico(texto);
+      if (toxic) {
+        mensajeError.textContent = "Tu comentario contiene lenguaje ofensivo y ha sido bloqueado.";
+        return;
+      }
 
-      const divComentario = document.createElement("div");
-      divComentario.classList.add("comentario");
-      divComentario.textContent = comentario;
-      divComentario.style.color = esAprobado ? "black" : "red";
-
-      listaComentarios.appendChild(divComentario);
-
+      const div = document.createElement("div");
+      div.classList.add("comentario");
+      div.textContent = texto;
+      lista.appendChild(div);
       input.value = "";
-      mensajeError.textContent = "";
     });
   </script>
 </body>
